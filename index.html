@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M1 Hacks - FF INFO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --main: #00f3ff;
+            --dark: #050505;
+            --card: rgba(10, 15, 20, 0.95);
+            --green: #25D366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #canvas_bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        .nav_bar {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.9);
+            border-bottom: 1px solid var(--main);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            z-index: 10;
+        }
+
+        .brand_logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: white;
+            text-shadow: 0 0 10px var(--main);
+        }
+        .brand_logo span { color: var(--main); }
+
+        .main_box {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 40px;
+            padding-bottom: 100px;
+            perspective: 1000px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--main);
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: transform 0.1s;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: var(--main);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .form_group { margin-bottom: 15px; }
+        
+        label { color: #aaa; font-size: 0.9rem; margin-bottom: 5px; display: block; }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #333;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--main);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+
+        .action_btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid var(--main);
+            color: var(--main);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .action_btn:hover {
+            background: var(--main);
+            color: black;
+            box-shadow: 0 0 25px var(--main);
+        }
+
+        .console_out {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #0f0;
+            margin-top: 15px;
+            height: 100px;
+            overflow: hidden;
+            display: none;
+            border-left: 2px solid #0f0;
+            padding-left: 10px;
+            background: rgba(0,0,0,0.8);
+        }
+
+        .data_display {
+            display: none;
+            margin-top: 25px;
+            border-top: 1px dashed rgba(255,255,255,0.2);
+            padding-top: 20px;
+            animation: popUp 0.5s ease;
+        }
+
+        .user_head {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), transparent);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--main);
+        }
+
+        .img_holder {
+            width: 80px; height: 80px;
+            position: relative;
+            border: 2px solid var(--main);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        .img_holder img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        .txt_name { font-family: 'Orbitron'; font-size: 1.3rem; font-weight: bold; color: white; }
+        .txt_uid { color: #ccc; font-size: 0.9rem; letter-spacing: 1px; }
+
+        .info_grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .info_box {
+            background: rgba(255,255,255,0.05);
+            padding: 15px 10px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #333;
+            transition: 0.3s;
+        }
+        .info_box:hover { border-color: var(--main); box-shadow: 0 0 10px rgba(0,243,255,0.1); }
+
+        .val_txt { font-size: 1.3rem; font-weight: 700; color: var(--main); margin-bottom: 5px; }
+        .lbl_txt { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        .wa_box {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .wa_btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid var(--green);
+            color: var(--green);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-decoration: none;
+            border-radius: 5px;
+            animation: pulse 2s infinite;
+            transition: 0.3s;
+        }
+
+        .wa_btn:hover {
+            background: var(--green);
+            color: black;
+            box-shadow: 0 0 25px var(--green);
+        }
+
+        @keyframes popUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
+
+        @media (max-width: 480px) {
+            .brand_logo { font-size: 1.4rem; }
+            .main_box { margin-top: 20px; width: 95%; }
+            .info_grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas_bg"></canvas>
+
+    <nav class="nav_bar">
+        <div class="brand_logo">M1 <span>Hacks</span></div>
+        <div style="font-size: 1.2rem; color: var(--main);"><i class="fa-solid fa-radar"></i></div>
+    </nav>
+
+    <div class="main_box" id="tilt_wrap">
+        <div class="panel">
+            <h2><i class="fa-solid fa-crosshairs"></i> PLAYER TRACKER</h2>
+            
+            <div class="form_group">
+                <label>SELECT SERVER</label>
+                <select id="sel_svr">
+                    <option value="PK">PAKISTAN (PK)</option>
+                    <option value="IND">INDIA (IND)</option>
+                    <option value="SG">SINGAPORE (SG)</option>
+                    <option value="BD">BANGLADESH (BD)</option>
+                    <option value="BR">BRAZIL (BR)</option>
+                    <option value="US">USA (US)</option>
+                    <option value="EU">EUROPE (EU)</option>
+                </select>
+            </div>
+
+            <div class="form_group">
+                <label>PLAYER UID</label>
+                <input type="number" id="inp_uid" placeholder="Example: 5301068880">
+            </div>
+
+            <button class="action_btn" onclick="startProcess()">
+                <i class="fa-solid fa-code-branch"></i> START HACK
+            </button>
+
+            <div class="console_out" id="cmd_view"></div>
+
+            <div class="data_display" id="res_view">
+                <div class="user_head">
+                    <div class="img_holder">
+                        <img id="p_img" src="https://i.pinimg.com/736x/2b/88/4f/2b884f1c305e0c3d9b0f498910404324.jpg">
+                    </div>
+                    <div>
+                        <div class="txt_name" id="p_name">Unknown</div>
+                        <div class="txt_uid" id="p_uid">UID: ---</div>
+                        <div style="color:var(--main); font-size:0.8rem; margin-top:5px;">
+                            <i class="fa-solid fa-globe"></i> <span id="p_reg">PK</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info_grid">
+                    <div class="info_box">
+                        <div class="val_txt" id="p_lvl">0</div>
+                        <div class="lbl_txt">Level</div>
+                    </div>
+                    <div class="info_box">
+                        <div class="val_txt" id="p_like">0</div>
+                        <div class="lbl_txt">Likes</div>
+                    </div>
+                    <div class="info_box">
+                        <div class="val_txt" style="color:#ffcc00" id="p_br">0</div>
+                        <div class="lbl_txt">BR Rank</div>
+                    </div>
+                    <div class="info_box">
+                        <div class="val_txt" style="color:#ffcc00" id="p_cs">0</div>
+                        <div class="lbl_txt">CS Rank</div>
+                    </div>
+                    <div class="info_box">
+                        <div class="val_txt" id="p_crt" style="font-size:1.1rem">N/A</div>
+                        <div class="lbl_txt">Created</div>
+                    </div>
+                    <div class="info_box">
+                        <div class="val_txt" id="p_log" style="font-size:1.1rem">N/A</div>
+                        <div class="lbl_txt">Last Login</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; padding:10px; background:rgba(0,0,0,0.6); text-align:center; border:1px dashed #444; border-radius: 5px;">
+                    <i class="fa-solid fa-quote-left" style="color:#555;"></i> 
+                    <span id="p_sig" style="font-style:italic; color:#ddd; font-family:monospace;">...</span>
+                    <i class="fa-solid fa-quote-right" style="color:#555;"></i>
+                </div>
+            </div>
+
+            <div class="wa_box">
+                <a href="https://whatsapp.com/channel/0029Vb6xMeJ7IUYbIB9W4U1d" target="_blank" class="wa_btn">
+                    <i class="fa-brands fa-whatsapp" style="font-size:1.4rem;"></i> JOIN WHATSAPP CHANNEL
+                </a>
+                <p style="font-size:0.7rem; color:#666; margin-top:5px;">Join for Updates & New Tools</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const cvs = document.getElementById('canvas_bg');
+        const ctx = cvs.getContext('2d');
+        let w, h, pts;
+
+        function setSz() {
+            w = cvs.width = window.innerWidth;
+            h = cvs.height = window.innerHeight;
+            pts = [];
+            const lim = window.innerWidth < 600 ? 50 : 100;
+            for(let i=0; i<lim; i++) {
+                pts.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    dx: (Math.random() - 0.5) * 1.5,
+                    dy: (Math.random() - 0.5) * 1.5,
+                    r: Math.random() * 2
+                });
+            }
+        }
+        
+        function runAnim() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#00f3ff';
+            
+            for(let i=0; i<pts.length; i++) {
+                let p = pts[i];
+                p.x += p.dx;
+                p.y += p.dy;
+
+                if(p.x < 0 || p.x > w) p.dx *= -1;
+                if(p.y < 0 || p.y > h) p.dy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                ctx.fill();
+
+                for(let j=i; j<pts.length; j++) {
+                    let p2 = pts[j];
+                    let d = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if(d < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${1 - d/120})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(runAnim);
+        }
+        window.addEventListener('resize', setSz);
+        setSz();
+        runAnim();
+
+        const pn = document.querySelector('.panel');
+        const wrap = document.getElementById('tilt_wrap');
+        
+        wrap.addEventListener('mousemove', (e) => {
+            if(window.innerWidth < 768) return;
+            let x = (window.innerWidth / 2 - e.pageX) / 25;
+            let y = (window.innerHeight / 2 - e.pageY) / 25;
+            pn.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        });
+        
+        wrap.addEventListener('mouseleave', () => {
+            pn.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+
+        const cmd = document.getElementById('cmd_view');
+        const res = document.getElementById('res_view');
+
+        async function startProcess() {
+            const u = document.getElementById('inp_uid').value;
+            const s = document.getElementById('sel_svr').value;
+
+            if(!u) { alert("Please Enter UID!"); return; }
+
+            res.style.display = 'none';
+            cmd.style.display = 'block';
+            cmd.innerHTML = '';
+
+            await printLine("> Initializing Exploit...");
+            await printLine("> Connecting to Server: " + s);
+            await printLine("> Extracting Player Data...");
+
+            try {
+                const ep = `https://ammarhackerffinfoapi.vercel.app/get_player_personal_show?server=${s}&uid=${u}`;
+                const raw = await fetch(ep);
+                const js = await raw.json();
+
+                if(js && js.basicinfo) {
+                    await printLine("> DATA DECRYPTED SUCCESSFULLY.", "#00f3ff");
+                    showInfo(js);
+                } else {
+                    throw new Error("Player Not Found");
+                }
+
+            } catch (err) {
+                await printLine(`> ERROR: ${err.message}`, "red");
+                alert("Failed! Check UID or Server.");
+            }
+        }
+
+        function showInfo(d) {
+            cmd.style.display = 'none';
+            res.style.display = 'block';
+
+            const b = d.basicinfo;
+            const so = d.socialinfo;
+
+            document.getElementById('p_img').src = "https://i.pinimg.com/736x/2b/88/4f/2b884f1c305e0c3d9b0f498910404324.jpg";
+            
+            document.getElementById('p_name').innerText = b.nickname;
+            document.getElementById('p_uid').innerText = "UID: " + b.accountid;
+            document.getElementById('p_reg').innerText = b.region;
+            
+            document.getElementById('p_lvl').innerText = b.level;
+            document.getElementById('p_like').innerText = b.liked;
+            document.getElementById('p_br').innerText = b.rankingpoints;
+            document.getElementById('p_cs').innerText = b.csrank;
+
+            document.getElementById('p_crt').innerText = convT(b.createat);
+            document.getElementById('p_log').innerText = convT(b.lastloginat);
+
+            if (so && so.signature) {
+                document.getElementById('p_sig').innerText = so.signature;
+            } else {
+                document.getElementById('p_sig').innerText = "TARGET LOCKED - NO SIGNATURE";
+            }
+        }
+
+        function convT(ts) {
+            if(!ts) return "N/A";
+            const dt = new Date(ts * 1000);
+            return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear().toString().substr(-2)}`;
+        }
+
+        function printLine(txt, col="#0f0") {
+            return new Promise(done => {
+                setTimeout(() => {
+                    cmd.innerHTML += `<div style="color:${col}">${txt}</div>`;
+                    cmd.scrollTop = cmd.scrollHeight;
+                    done();
+                }, 500);
+            });
+        }
+    </script>
+</body>
+</html>
+<!-- Powered by MIAN ABDUL-REHMAN | JLANDER TOOLS -->
